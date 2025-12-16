@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Pulse - Daily Financial Dashboard</title>
+  <meta name="description" content="Your morning market pulse - live indices, sector heatmaps, top movers, calendars, and curated financial news.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Top Navigation Bar -->
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <h1 class="logo">
+        <span class="logo-icon">📊</span>
+        <span class="logo-text">Market Pulse</span>
+      </h1>
+      <div class="date-picker-wrapper">
+        <input type="date" id="date-picker" class="date-picker">
+        <span class="date-display" id="date-display"></span>
+      </div>
+    </div>
+    
+    <nav class="tab-nav" id="tab-nav">
+      <button class="tab-btn active" data-tab="overview">Overview</button>
+      <button class="tab-btn" data-tab="sectors">Sectors</button>
+      <button class="tab-btn" data-tab="movers">Movers</button>
+      <button class="tab-btn" data-tab="calendars">Calendars</button>
+      <button class="tab-btn" data-tab="news">News</button>
+    </nav>
+    
+    <div class="top-bar-right">
+      <div class="search-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <input type="text" id="search-input" class="search-input" placeholder="Search watchlist & news...">
+      </div>
+      
+      <div class="controls">
+        <button class="control-btn" id="compact-toggle" title="Toggle Compact View">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </button>
+        <button class="control-btn" id="theme-toggle" title="Toggle Theme">
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+          </svg>
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+        <button class="control-btn" id="save-view-btn" title="Save Current View">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <main class="main-layout">
+    <!-- Left Sidebar -->
+    <aside class="sidebar sidebar-left">
+      <section class="card watchlist-card">
+        <div class="card-header">
+          <h2>Watchlist</h2>
+          <button class="icon-btn" id="add-watchlist-btn" title="Add Symbol">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="watchlist-input-wrapper hidden" id="watchlist-input-wrapper">
+          <input type="text" id="watchlist-input" placeholder="Enter symbol (e.g., AAPL)">
+          <button class="btn-small" id="watchlist-add-confirm">Add</button>
+        </div>
+        <ul class="watchlist" id="watchlist"></ul>
+      </section>
+      
+      <section class="card quick-links-card">
+        <div class="card-header">
+          <h2>Quick Links</h2>
+        </div>
+        <ul class="quick-links">
+          <li><a href="https://www.tradingview.com/markets/" target="_blank" rel="noopener">TradingView Markets</a></li>
+          <li><a href="https://finance.yahoo.com/" target="_blank" rel="noopener">Yahoo Finance</a></li>
+          <li><a href="https://www.cnbc.com/markets/" target="_blank" rel="noopener">CNBC Markets</a></li>
+          <li><a href="https://www.bloomberg.com/markets" target="_blank" rel="noopener">Bloomberg Markets</a></li>
+          <li><a href="https://www.investing.com/" target="_blank" rel="noopener">Investing.com</a></li>
+          <li><a href="https://www.marketwatch.com/" target="_blank" rel="noopener">MarketWatch</a></li>
+        </ul>
+      </section>
+
+      <section class="card saved-views-card">
+        <div class="card-header">
+          <h2>Saved Views</h2>
+        </div>
+        <ul class="saved-views" id="saved-views"></ul>
+      </section>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Sector Filter Chip -->
+      <div class="sector-filter-chip hidden" id="sector-filter-chip">
+        <span>Filtering by: <strong id="active-sector-name"></strong></span>
+        <button class="chip-close" id="clear-sector-filter">×</button>
+      </div>
+
+      <!-- Overview Section -->
+      <section class="content-section" id="section-overview">
+        <div class="section-header">
+          <h2>Market Overview</h2>
+        </div>
+        <div class="market-overview-grid">
+          <div class="widget-card mini-chart-card">
+            <a href="https://www.tradingview.com/symbols/SPY/" target="_blank" rel="noopener" class="widget-title-link">S&P 500 ETF (SPY)</a>
+            <div class="widget-container" id="widget-spy"></div>
+          </div>
+          <div class="widget-card mini-chart-card">
+            <a href="https://www.tradingview.com/symbols/QQQ/" target="_blank" rel="noopener" class="widget-title-link">Nasdaq 100 ETF (QQQ)</a>
+            <div class="widget-container" id="widget-qqq"></div>
+          </div>
+          <div class="widget-card mini-chart-card">
+            <a href="https://www.tradingview.com/symbols/DIA/" target="_blank" rel="noopener" class="widget-title-link">Dow Jones ETF (DIA)</a>
+            <div class="widget-container" id="widget-dia"></div>
+          </div>
+          <div class="widget-card mini-chart-card">
+            <a href="https://www.tradingview.com/symbols/IWM/" target="_blank" rel="noopener" class="widget-title-link">Russell 2000 ETF (IWM)</a>
+            <div class="widget-container" id="widget-iwm"></div>
+          </div>
+          <div class="widget-card mini-chart-card">
+            <a href="https://www.tradingview.com/symbols/TLT/" target="_blank" rel="noopener" class="widget-title-link">20+ Year Treasury (TLT)</a>
+            <div class="widget-container" id="widget-tlt"></div>
+          </div>
+          <div class="widget-card mini-chart-card">
+            <a href="https://www.tradingview.com/symbols/GLD/" target="_blank" rel="noopener" class="widget-title-link">Gold ETF (GLD)</a>
+            <div class="widget-container" id="widget-gld"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sectors Section -->
+      <section class="content-section" id="section-sectors">
+        <div class="section-header">
+          <h2>Sector Heatmap</h2>
+        </div>
+        
+        <!-- Sector Pills -->
+        <div class="sector-pills" id="sector-pills">
+          <button class="sector-pill" data-sector="technology">Technology</button>
+          <button class="sector-pill" data-sector="healthcare">Healthcare</button>
+          <button class="sector-pill" data-sector="financials">Financials</button>
+          <button class="sector-pill" data-sector="energy">Energy</button>
+          <button class="sector-pill" data-sector="consumer">Consumer</button>
+          <button class="sector-pill" data-sector="industrials">Industrials</button>
+          <button class="sector-pill" data-sector="utilities">Utilities</button>
+          <button class="sector-pill" data-sector="materials">Materials</button>
+          <button class="sector-pill" data-sector="realestate">Real Estate</button>
+          <button class="sector-pill" data-sector="communication">Communication</button>
+        </div>
+        
+        <div class="heatmap-legend">
+          <span class="legend-label">▼ Losers</span>
+          <div class="legend-gradient"></div>
+          <span class="legend-label">Gainers ▲</span>
+        </div>
+        
+        <div class="widget-card heatmap-card">
+          <div class="widget-container widget-tall" id="widget-heatmap"></div>
+        </div>
+      </section>
+
+      <!-- Movers Section -->
+      <section class="content-section" id="section-movers">
+        <div class="section-header">
+          <h2>Biggest Movers</h2>
+        </div>
+        <div class="movers-tabs">
+          <button class="movers-tab active" data-period="regular">Regular Hours</button>
+          <button class="movers-tab" data-period="premarket">Pre-Market</button>
+          <button class="movers-tab" data-period="afterhours">After-Hours</button>
+        </div>
+        <div class="widget-card movers-card">
+          <div class="widget-container widget-tall" id="widget-movers"></div>
+        </div>
+      </section>
+
+      <!-- Calendars Section -->
+      <section class="content-section" id="section-calendars">
+        <div class="section-header">
+          <h2>Calendars</h2>
+        </div>
+        <div class="calendars-grid">
+          <div class="widget-card calendar-card">
+            <h3 class="widget-subtitle">Earnings Calendar</h3>
+            <div class="widget-container widget-tall" id="widget-earnings"></div>
+          </div>
+          <div class="widget-card calendar-card">
+            <h3 class="widget-subtitle">Economic Calendar</h3>
+            <div class="widget-container widget-tall" id="widget-economic"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- News Section -->
+      <section class="content-section" id="section-news">
+        <div class="section-header">
+          <h2>Financial News</h2>
+          <span class="news-count" id="news-count"></span>
+        </div>
+        <div class="news-feed" id="news-feed">
+          <div class="loading-spinner">
+            <div class="spinner"></div>
+            <span>Loading news...</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Right Sidebar -->
+    <aside class="sidebar sidebar-right">
+      <section class="card notes-card">
+        <div class="card-header">
+          <h2>Notes</h2>
+          <button class="icon-btn" id="clear-notes-btn" title="Clear Notes">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+        <textarea id="notes-textarea" class="notes-textarea" placeholder="Jot down your market thoughts..."></textarea>
+      </section>
+    </aside>
+  </main>
+
+  <!-- Mobile Bottom Tab Bar -->
+  <nav class="bottom-tab-bar" id="bottom-tab-bar">
+    <button class="bottom-tab active" data-tab="overview">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+      </svg>
+      <span>Overview</span>
+    </button>
+    <button class="bottom-tab" data-tab="sectors">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7"></rect>
+        <rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect>
+        <rect x="3" y="14" width="7" height="7"></rect>
+      </svg>
+      <span>Sectors</span>
+    </button>
+    <button class="bottom-tab" data-tab="movers">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+        <polyline points="17 6 23 6 23 12"></polyline>
+      </svg>
+      <span>Movers</span>
+    </button>
+    <button class="bottom-tab" data-tab="calendars">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>
+      <span>Calendars</span>
+    </button>
+    <button class="bottom-tab" data-tab="news">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path>
+        <path d="M18 14h-8"></path>
+        <path d="M15 18h-5"></path>
+        <path d="M10 6h8v4h-8V6Z"></path>
+      </svg>
+      <span>News</span>
+    </button>
+  </nav>
+
+  <!-- Save View Modal -->
+  <div class="modal-overlay hidden" id="save-view-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Save Current View</h3>
+        <button class="modal-close" id="close-save-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="view-name-input" class="modal-input" placeholder="Enter view name...">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancel-save-view">Cancel</button>
+        <button class="btn btn-primary" id="confirm-save-view">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
