@@ -1,0 +1,12 @@
+# OS / editor
+.DS_Store
+.vscode/*
+!.vscode/settings.json
+
+# Node / tooling (if you add later)
+node_modules/
+dist/
+build/
+
+# Logs
+*.log
