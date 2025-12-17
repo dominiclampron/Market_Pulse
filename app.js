@@ -31,7 +31,7 @@ const CONFIG = {
 
 // ===== State Management =====
 const state = {
-    theme: localStorage.getItem('mp_theme') || 'light',
+    theme: localStorage.getItem('mp_theme') || 'dark',
     compactMode: localStorage.getItem('mp_compact') === 'true',
     activeTab: localStorage.getItem('mp_tab') || 'overview',
     activeSector: null,

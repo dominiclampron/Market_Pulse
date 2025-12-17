@@ -76,7 +76,7 @@ A standalone financial dashboard powered by free TradingView widgets and public 
 
 ## Version
 
-**Current: v2.0** (December 2024)
+**Current: v2.0.1** (December 2024)
 
 See `CHANGELOG.md` for detailed version history.
 
