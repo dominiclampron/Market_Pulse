@@ -4,6 +4,22 @@ All notable changes to Market Pulse will be documented in this file.
 
 ---
 
+## [2.0.1] - 2025-12-16
+
+### Changed
+- **Dark Mode Default**: New users now start with dark theme instead of light
+- **4K/High-Resolution Layout**: 
+  - At 1920px+: All 4 widgets (Market Overview, Movers, Earnings, Economic) display in a single horizontal row
+  - Heatmap height scales progressively: 1.5x at 1920px, 1.75x at 2560px, 2x at 4K (3840px)
+  - Widget cards scale appropriately for larger displays
+
+### Technical
+- Added media queries for 1920px, 2560px, and 3840px breakpoints
+- Merged overview-row-2 and overview-row-3 into unified overview-widgets-grid
+- Grid switches from 2-column to 4-column above 1920px
+
+---
+
 ## [1.4.2] - 2025-12-16
 
 ### Changed

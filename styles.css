@@ -755,7 +755,8 @@ ul {
   margin-bottom: 1rem;
 }
 
-.overview-row-3 {
+/* Combined widgets grid (2-col default, 4-col at 1920px+) */
+.overview-widgets-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
@@ -1484,4 +1485,74 @@ body[data-active-tab="calendars"] .calendar-card .widget-container.widget-tall {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+/* ===== High Resolution Displays (1440p+) ===== */
+
+/* 1920px+ (Above 1440p) - 4 widgets in single row, heatmap 1.5x height */
+@media (min-width: 1920px) {
+
+  /* All 4 widgets in a single row */
+  .overview-widgets-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Heatmap 1.5x height */
+  .overview-heatmap-card {
+    min-height: 720px;
+  }
+
+  .widget-container.widget-heatmap-overview {
+    min-height: 650px;
+  }
+
+  /* Market/Movers/Calendar cards taller */
+  .overview-market-card,
+  .overview-movers-card,
+  .overview-calendar-card {
+    min-height: 500px;
+  }
+}
+
+/* 2560px+ (2K/QHD) - heatmap 1.75x height */
+@media (min-width: 2560px) {
+  .overview-heatmap-card {
+    min-height: 840px;
+  }
+
+  .widget-container.widget-heatmap-overview {
+    min-height: 780px;
+  }
+
+  .overview-market-card,
+  .overview-movers-card,
+  .overview-calendar-card {
+    min-height: 550px;
+  }
+}
+
+/* 3840px+ (4K UHD) - heatmap 2x height */
+@media (min-width: 3840px) {
+  .overview-heatmap-card {
+    min-height: 960px;
+  }
+
+  .widget-container.widget-heatmap-overview {
+    min-height: 900px;
+  }
+
+  .overview-market-card,
+  .overview-movers-card,
+  .overview-calendar-card {
+    min-height: 600px;
+  }
+
+  /* Larger fonts for 4K */
+  .card-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .section-header h2 {
+    font-size: 1.75rem;
+  }
 }
