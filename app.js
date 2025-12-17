@@ -40,7 +40,9 @@ const state = {
     notes: localStorage.getItem('mp_notes') || '',
     savedViews: JSON.parse(localStorage.getItem('mp_views') || '[]'),
     newsItems: [],
-    moversPeriod: 'regular'
+    moversPeriod: 'regular',
+    watchlistRemoveMode: false,
+    activeHeatmap: 'stocks'
 };
 
 // ===== DOM Elements =====
@@ -54,20 +56,19 @@ const elements = {
     themeToggle: document.getElementById('theme-toggle'),
     compactToggle: document.getElementById('compact-toggle'),
     saveViewBtn: document.getElementById('save-view-btn'),
-    sectorFilterChip: document.getElementById('sector-filter-chip'),
-    activeSectorName: document.getElementById('active-sector-name'),
-    clearSectorFilter: document.getElementById('clear-sector-filter'),
-    sectorPills: document.getElementById('sector-pills'),
-    watchlistContainer: document.getElementById('watchlist'),
+    watchlistWidgets: document.getElementById('watchlist-widgets'),
     watchlistInputWrapper: document.getElementById('watchlist-input-wrapper'),
     watchlistInput: document.getElementById('watchlist-input'),
     addWatchlistBtn: document.getElementById('add-watchlist-btn'),
+    removeWatchlistBtn: document.getElementById('remove-watchlist-btn'),
     watchlistAddConfirm: document.getElementById('watchlist-add-confirm'),
     notesTextarea: document.getElementById('notes-textarea'),
     clearNotesBtn: document.getElementById('clear-notes-btn'),
     savedViewsList: document.getElementById('saved-views'),
     newsFeed: document.getElementById('news-feed'),
     newsCount: document.getElementById('news-count'),
+    newsFeedOverview: document.getElementById('news-feed-overview'),
+    newsCountOverview: document.getElementById('news-count-overview'),
     saveViewModal: document.getElementById('save-view-modal'),
     viewNameInput: document.getElementById('view-name-input'),
     closeSaveModal: document.getElementById('close-save-modal'),
@@ -138,6 +139,9 @@ function showActiveTab() {
     document.querySelectorAll('.tab-btn, .bottom-tab').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.tab === state.activeTab);
     });
+
+    // Update body attribute for tab-specific layouts
+    document.body.setAttribute('data-active-tab', state.activeTab);
 }
 
 function switchTab(tab) {
@@ -150,30 +154,33 @@ function switchTab(tab) {
 function initWidgets() {
     const colorTheme = CONFIG.tradingViewTheme[state.theme];
 
-    // Mini Symbol Overview Widgets
-    const symbols = [
-        { container: 'widget-spy', symbol: 'AMEX:SPY' },
-        { container: 'widget-qqq', symbol: 'NASDAQ:QQQ' },
-        { container: 'widget-dia', symbol: 'AMEX:DIA' },
-        { container: 'widget-iwm', symbol: 'AMEX:IWM' },
-        { container: 'widget-tlt', symbol: 'NASDAQ:TLT' },
-        { container: 'widget-gld', symbol: 'AMEX:GLD' }
-    ];
+    // === Overview Dashboard Widgets ===
 
-    symbols.forEach(({ container, symbol }) => {
-        createMiniChartWidget(container, symbol, colorTheme);
-    });
+    // Market Overview Widget - shows chart with multiple symbols like reference image
+    createMarketOverviewWidget('widget-market-chart', colorTheme);
 
-    // Stock Heatmap Widget
-    createHeatmapWidget('widget-heatmap', colorTheme);
+    // Sector Heatmap for Overview
+    renderHeatmap('widget-heatmap-overview');
 
-    // Stock Market Widget (Movers)
+    // Movers List (hotlists widget with chart)
+    createMoversWidget('widget-movers-overview', colorTheme);
+
+    // Calendars for Overview
+    createEarningsWidget('widget-earnings-overview', colorTheme);
+    createEconomicCalendarWidget('widget-economic-overview', colorTheme);
+
+    // === Dedicated Tab Widgets (for when user clicks those tabs) ===
+
+    // Stock Heatmap Widget (full version for Heatmaps tab)
+    renderHeatmap('widget-heatmap');
+
+    // Stock Market Widget (Movers tab)
     createMoversWidget('widget-movers', colorTheme);
 
-    // Earnings Calendar (using Timeline widget as alternative)
+    // Earnings Calendar (Calendars tab)
     createEarningsWidget('widget-earnings', colorTheme);
 
-    // Economic Calendar
+    // Economic Calendar (Calendars tab)
     createEconomicCalendarWidget('widget-economic', colorTheme);
 }
 
@@ -210,6 +217,70 @@ function createMiniChartWidget(containerId, symbol, colorTheme) {
         isTransparent: true,
         autosize: true,
         largeChartUrl: ''
+    });
+
+    script.onerror = () => {
+        container.innerHTML = '<div class="widget-error">Temporarily unavailable from source</div>';
+    };
+
+    widgetContainer.appendChild(script);
+}
+
+// Market Overview Widget - using market-overview widget
+function createMarketOverviewWidget(containerId, colorTheme) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const widgetContainer = document.createElement('div');
+    widgetContainer.className = 'tradingview-widget-container';
+    widgetContainer.style.height = '100%';
+    widgetContainer.style.width = '100%';
+
+    const widgetDiv = document.createElement('div');
+    widgetDiv.className = 'tradingview-widget-container__widget';
+    widgetDiv.style.height = '100%';
+    widgetDiv.style.width = '100%';
+
+    widgetContainer.appendChild(widgetDiv);
+    container.appendChild(widgetContainer);
+
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js';
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+        colorTheme: colorTheme,
+        dateRange: '12M',
+        showChart: true,
+        locale: 'en',
+        width: '100%',
+        height: '100%',
+        largeChartUrl: '',
+        isTransparent: true,
+        showSymbolLogo: true,
+        showFloatingTooltip: true,
+        plotLineColorGrowing: 'rgba(41, 98, 255, 1)',
+        plotLineColorFalling: 'rgba(41, 98, 255, 1)',
+        gridLineColor: 'rgba(240, 243, 250, 0)',
+        scaleFontColor: 'rgba(120, 123, 134, 1)',
+        belowLineFillColorGrowing: 'rgba(41, 98, 255, 0.12)',
+        belowLineFillColorFalling: 'rgba(41, 98, 255, 0.12)',
+        belowLineFillColorGrowingBottom: 'rgba(41, 98, 255, 0)',
+        belowLineFillColorFallingBottom: 'rgba(41, 98, 255, 0)',
+        symbolActiveColor: 'rgba(41, 98, 255, 0.12)',
+        tabs: [
+            {
+                title: 'Indices',
+                symbols: [
+                    { s: 'FOREXCOM:SPXUSD', d: 'S&P 500' },
+                    { s: 'FOREXCOM:NSXUSD', d: 'Nasdaq 100' },
+                    { s: 'FOREXCOM:DJI', d: 'Dow 30' }
+                ],
+                originalTitle: 'Indices'
+            }
+        ]
     });
 
     script.onerror = () => {
@@ -264,6 +335,116 @@ function createHeatmapWidget(containerId, colorTheme) {
     };
 
     widgetContainer.appendChild(script);
+}
+
+function createEtfHeatmapWidget(containerId, colorTheme) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const widgetContainer = document.createElement('div');
+    widgetContainer.className = 'tradingview-widget-container';
+    widgetContainer.style.height = '100%';
+    widgetContainer.style.width = '100%';
+
+    const widgetDiv = document.createElement('div');
+    widgetDiv.className = 'tradingview-widget-container__widget';
+    widgetDiv.style.height = '100%';
+    widgetDiv.style.width = '100%';
+
+    widgetContainer.appendChild(widgetDiv);
+    container.appendChild(widgetContainer);
+
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-etf-heatmap.js';
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+        dataSource: 'AllUSEtf',
+        blockSize: 'volume',
+        blockColor: 'change',
+        grouping: 'asset_class',
+        locale: 'en',
+        symbolUrl: '',
+        colorTheme: colorTheme,
+        hasTopBar: false,
+        isDataSetEnabled: false,
+        isZoomEnabled: true,
+        hasSymbolTooltip: true,
+        isMonoSize: false,
+        width: '100%',
+        height: '100%'
+    });
+
+    script.onerror = () => {
+        container.innerHTML = '<div class="widget-error">Temporarily unavailable from source</div>';
+    };
+
+    widgetContainer.appendChild(script);
+}
+
+function createCryptoHeatmapWidget(containerId, colorTheme) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const widgetContainer = document.createElement('div');
+    widgetContainer.className = 'tradingview-widget-container';
+    widgetContainer.style.height = '100%';
+    widgetContainer.style.width = '100%';
+
+    const widgetDiv = document.createElement('div');
+    widgetDiv.className = 'tradingview-widget-container__widget';
+    widgetDiv.style.height = '100%';
+    widgetDiv.style.width = '100%';
+
+    widgetContainer.appendChild(widgetDiv);
+    container.appendChild(widgetContainer);
+
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-crypto-coins-heatmap.js';
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+        dataSource: 'Crypto',
+        blockSize: 'market_cap_calc',
+        blockColor: '24h_close_change|5',
+        locale: 'en',
+        symbolUrl: '',
+        colorTheme: colorTheme,
+        hasTopBar: false,
+        isDataSetEnabled: false,
+        isZoomEnabled: true,
+        hasSymbolTooltip: true,
+        isMonoSize: false,
+        width: '100%',
+        height: '100%'
+    });
+
+    script.onerror = () => {
+        container.innerHTML = '<div class="widget-error">Temporarily unavailable from source</div>';
+    };
+
+    widgetContainer.appendChild(script);
+}
+
+function renderHeatmap(containerId) {
+    const colorTheme = CONFIG.tradingViewTheme[state.theme];
+
+    switch (state.activeHeatmap) {
+        case 'etf':
+            createEtfHeatmapWidget(containerId, colorTheme);
+            break;
+        case 'crypto':
+            createCryptoHeatmapWidget(containerId, colorTheme);
+            break;
+        case 'stocks':
+        default:
+            createHeatmapWidget(containerId, colorTheme);
+            break;
+    }
 }
 
 function createMoversWidget(containerId, colorTheme) {
@@ -499,18 +680,27 @@ function renderNews() {
     const filteredItems = filterNewsItems();
 
     if (filteredItems.length === 0) {
-        elements.newsFeed.innerHTML = `
+        const emptyMessage = `
       <div class="widget-error">
         No news items match your current filters.
       </div>
     `;
-        elements.newsCount.textContent = '0 articles';
+        if (elements.newsFeed) {
+            elements.newsFeed.innerHTML = emptyMessage;
+        }
+        if (elements.newsFeedOverview) {
+            elements.newsFeedOverview.innerHTML = emptyMessage;
+        }
+        if (elements.newsCount) {
+            elements.newsCount.textContent = '0 articles';
+        }
+        if (elements.newsCountOverview) {
+            elements.newsCountOverview.textContent = '0 articles';
+        }
         return;
     }
 
-    elements.newsCount.textContent = `${filteredItems.length} articles`;
-
-    elements.newsFeed.innerHTML = filteredItems.map(item => `
+    const newsHTML = (items) => items.map(item => `
     <a href="${item.link}" target="_blank" rel="noopener" class="news-item" data-title="${escapeHtml(item.title.toLowerCase())}">
       <h3 class="news-headline">${escapeHtml(item.title)}</h3>
       <div class="news-meta">
@@ -519,6 +709,23 @@ function renderNews() {
       </div>
     </a>
   `).join('');
+
+    // Full news feed (News tab)
+    if (elements.newsFeed) {
+        elements.newsFeed.innerHTML = newsHTML(filteredItems);
+    }
+    if (elements.newsCount) {
+        elements.newsCount.textContent = `${filteredItems.length} articles`;
+    }
+
+    // Overview news feed (show more articles - 30 items)
+    const overviewItems = filteredItems.slice(0, 30);
+    if (elements.newsFeedOverview) {
+        elements.newsFeedOverview.innerHTML = newsHTML(overviewItems);
+    }
+    if (elements.newsCountOverview) {
+        elements.newsCountOverview.textContent = `${filteredItems.length} articles`;
+    }
 }
 
 function filterNewsItems() {
@@ -602,50 +809,101 @@ function clearSectorFilter() {
 // ===== Search =====
 function handleSearch(query) {
     state.searchQuery = query;
-    filterWatchlist();
     renderNews();
 }
 
-function filterWatchlist() {
-    const items = elements.watchlistContainer.querySelectorAll('.watchlist-item');
-    const query = state.searchQuery.toLowerCase();
-
-    items.forEach(item => {
-        const symbol = item.dataset.symbol.toLowerCase();
-        item.style.display = query && !symbol.includes(query) ? 'none' : '';
-    });
-}
-
 // ===== Watchlist =====
+const WATCHLIST_MAX = 5;
+
 function renderWatchlist() {
+    const colorTheme = CONFIG.tradingViewTheme[state.theme];
+
     if (state.watchlist.length === 0) {
-        elements.watchlistContainer.innerHTML = `
-      <li class="watchlist-empty">No symbols in watchlist</li>
-    `;
+        elements.watchlistWidgets.innerHTML = `
+            <div class="watchlist-empty">No symbols in watchlist</div>
+        `;
+        updateAddButtonState();
         return;
     }
 
-    elements.watchlistContainer.innerHTML = state.watchlist.map(symbol => `
-    <li class="watchlist-item" data-symbol="${symbol}">
-      <a href="https://www.tradingview.com/symbols/${symbol}/" target="_blank" rel="noopener">${symbol}</a>
-      <button class="watchlist-remove" data-symbol="${symbol}">×</button>
-    </li>
-  `).join('');
+    // Clear and rebuild widgets
+    elements.watchlistWidgets.innerHTML = '';
 
-    // Add remove handlers
-    elements.watchlistContainer.querySelectorAll('.watchlist-remove').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            removeFromWatchlist(btn.dataset.symbol);
-        });
+    state.watchlist.forEach(symbol => {
+        createWatchlistWidget(symbol, colorTheme);
     });
 
-    filterWatchlist();
+    // Update remove mode state and add button state
+    updateWatchlistRemoveMode();
+    updateAddButtonState();
+}
+
+function createWatchlistWidget(symbol, colorTheme) {
+    const fullSymbol = `NASDAQ:${symbol}`;
+
+    // Create widget item container
+    const widgetItem = document.createElement('div');
+    widgetItem.className = 'watchlist-widget-item';
+    widgetItem.dataset.symbol = symbol;
+
+    // Create remove overlay
+    const removeOverlay = document.createElement('div');
+    removeOverlay.className = 'remove-overlay';
+    removeOverlay.innerHTML = '<span>Remove</span>';
+    removeOverlay.addEventListener('click', () => {
+        removeFromWatchlist(symbol);
+    });
+
+    // Create widget container
+    const widgetContainer = document.createElement('div');
+    widgetContainer.className = 'widget-container';
+
+    // Create TradingView widget structure
+    const tvContainer = document.createElement('div');
+    tvContainer.className = 'tradingview-widget-container';
+    tvContainer.style.height = '100%';
+    tvContainer.style.width = '100%';
+
+    const tvWidget = document.createElement('div');
+    tvWidget.className = 'tradingview-widget-container__widget';
+    tvWidget.style.height = '100%';
+    tvWidget.style.width = '100%';
+
+    tvContainer.appendChild(tvWidget);
+
+    // Create and append script
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+        symbol: fullSymbol,
+        width: '100%',
+        height: '100%',
+        locale: 'en',
+        dateRange: '1D',
+        colorTheme: colorTheme,
+        isTransparent: true,
+        autosize: true,
+        chartOnly: false,
+        noTimeScale: false
+    });
+
+    tvContainer.appendChild(script);
+    widgetContainer.appendChild(tvContainer);
+
+    // Assemble widget item
+    widgetItem.appendChild(removeOverlay);
+    widgetItem.appendChild(widgetContainer);
+
+    // Add to watchlist widgets container
+    elements.watchlistWidgets.appendChild(widgetItem);
 }
 
 function addToWatchlist(symbol) {
     symbol = symbol.toUpperCase().trim();
     if (!symbol || state.watchlist.includes(symbol)) return;
+    if (state.watchlist.length >= WATCHLIST_MAX) return; // Max 5 widgets
 
     state.watchlist.push(symbol);
     localStorage.setItem('mp_watchlist', JSON.stringify(state.watchlist));
@@ -656,6 +914,31 @@ function removeFromWatchlist(symbol) {
     state.watchlist = state.watchlist.filter(s => s !== symbol);
     localStorage.setItem('mp_watchlist', JSON.stringify(state.watchlist));
     renderWatchlist();
+}
+
+function toggleWatchlistRemoveMode() {
+    state.watchlistRemoveMode = !state.watchlistRemoveMode;
+    updateWatchlistRemoveMode();
+}
+
+function updateWatchlistRemoveMode() {
+    if (state.watchlistRemoveMode) {
+        elements.watchlistWidgets.classList.add('remove-mode');
+        elements.removeWatchlistBtn.classList.add('active');
+    } else {
+        elements.watchlistWidgets.classList.remove('remove-mode');
+        elements.removeWatchlistBtn.classList.remove('active');
+    }
+}
+
+function updateAddButtonState() {
+    if (state.watchlist.length >= WATCHLIST_MAX) {
+        elements.addWatchlistBtn.classList.add('disabled');
+        elements.addWatchlistBtn.disabled = true;
+    } else {
+        elements.addWatchlistBtn.classList.remove('disabled');
+        elements.addWatchlistBtn.disabled = false;
+    }
 }
 
 // ===== Notes =====
@@ -790,14 +1073,22 @@ function setupEventListeners() {
         handleSearch(e.target.value);
     });
 
-    // Sector pills
-    elements.sectorPills.addEventListener('click', (e) => {
-        const pill = e.target.closest('.sector-pill');
-        if (pill) selectSector(pill.dataset.sector);
-    });
+    // Heatmap selector buttons
+    document.querySelectorAll('.heatmap-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const heatmapType = btn.dataset.heatmap;
+            state.activeHeatmap = heatmapType;
 
-    // Clear sector filter
-    elements.clearSectorFilter.addEventListener('click', clearSectorFilter);
+            // Update all heatmap buttons
+            document.querySelectorAll('.heatmap-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.heatmap === heatmapType);
+            });
+
+            // Re-render both heatmaps
+            renderHeatmap('widget-heatmap-overview');
+            renderHeatmap('widget-heatmap');
+        });
+    });
 
     // Watchlist
     elements.addWatchlistBtn.addEventListener('click', () => {
@@ -820,6 +1111,9 @@ function setupEventListeners() {
             elements.watchlistInputWrapper.classList.add('hidden');
         }
     });
+
+    // Watchlist remove mode toggle
+    elements.removeWatchlistBtn.addEventListener('click', toggleWatchlistRemoveMode);
 
     // Notes
     elements.notesTextarea.addEventListener('input', saveNotes);
@@ -854,14 +1148,14 @@ function setupEventListeners() {
         }
     });
 
-    // Movers period tabs
+    // Movers period tabs (dedicated Movers tab)
     elements.moversTabs.forEach(tab => {
         tab.addEventListener('click', () => {
             state.moversPeriod = tab.dataset.period;
             elements.moversTabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             // Note: TradingView hotlists widget doesn't support period switching
-            // This is for UI purposes - the widget shows regular hours data
+            // The widget always shows regular hours data
         });
     });
 }

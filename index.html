@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Market Pulse - Daily Financial Dashboard</title>
-  <meta name="description" content="Your morning market pulse - live indices, sector heatmaps, top movers, calendars, and curated financial news.">
+  <meta name="description"
+    content="Your morning market pulse - live indices, sector heatmaps, top movers, calendars, and curated financial news.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <!-- Top Navigation Bar -->
   <header class="top-bar">
@@ -23,24 +26,24 @@
         <span class="date-display" id="date-display"></span>
       </div>
     </div>
-    
+
     <nav class="tab-nav" id="tab-nav">
       <button class="tab-btn active" data-tab="overview">Overview</button>
-      <button class="tab-btn" data-tab="sectors">Sectors</button>
+      <button class="tab-btn" data-tab="heatmaps">Heatmaps</button>
       <button class="tab-btn" data-tab="movers">Movers</button>
       <button class="tab-btn" data-tab="calendars">Calendars</button>
       <button class="tab-btn" data-tab="news">News</button>
     </nav>
-    
+
     <div class="top-bar-right">
       <div class="search-wrapper">
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8"></circle>
           <path d="m21 21-4.35-4.35"></path>
         </svg>
-        <input type="text" id="search-input" class="search-input" placeholder="Search watchlist & news...">
+        <input type="text" id="search-input" class="search-input" placeholder="Search a News Topic">
       </div>
-      
+
       <div class="controls">
         <button class="control-btn" id="compact-toggle" title="Toggle Compact View">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -53,7 +56,9 @@
         <button class="control-btn" id="theme-toggle" title="Toggle Theme">
           <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="5"></circle>
-            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+            <path
+              d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42">
+            </path>
           </svg>
           <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
@@ -77,20 +82,27 @@
       <section class="card watchlist-card">
         <div class="card-header">
           <h2>Watchlist</h2>
-          <button class="icon-btn" id="add-watchlist-btn" title="Add Symbol">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-          </button>
+          <div class="watchlist-controls">
+            <button class="icon-btn" id="add-watchlist-btn" title="Add Symbol">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+            <button class="icon-btn" id="remove-watchlist-btn" title="Remove Mode">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+          </div>
         </div>
         <div class="watchlist-input-wrapper hidden" id="watchlist-input-wrapper">
-          <input type="text" id="watchlist-input" placeholder="Enter symbol (e.g., AAPL)">
+          <input type="text" id="watchlist-input" placeholder="Symbol (e.g., NVDA)">
           <button class="btn-small" id="watchlist-add-confirm">Add</button>
         </div>
-        <ul class="watchlist" id="watchlist"></ul>
+        <div class="watchlist-widgets" id="watchlist-widgets"></div>
       </section>
-      
+
       <section class="card quick-links-card">
         <div class="card-header">
           <h2>Quick Links</h2>
@@ -111,6 +123,19 @@
         </div>
         <ul class="saved-views" id="saved-views"></ul>
       </section>
+
+      <section class="card notes-card">
+        <div class="card-header">
+          <h2>Notes</h2>
+          <button class="icon-btn" id="clear-notes-btn" title="Clear Notes">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+        <textarea id="notes-textarea" class="notes-textarea" placeholder="Jot down your market thoughts..."></textarea>
+      </section>
     </aside>
 
     <!-- Main Content -->
@@ -121,65 +146,91 @@
         <button class="chip-close" id="clear-sector-filter">×</button>
       </div>
 
-      <!-- Overview Section -->
+      <!-- Overview Section - Consolidated Dashboard -->
       <section class="content-section" id="section-overview">
-        <div class="section-header">
-          <h2>Market Overview</h2>
+        <!-- Row 1: Heatmap (full width) -->
+        <div class="overview-row-1">
+          <div class="widget-card overview-heatmap-card">
+            <div class="card-header">
+              <h2>Heatmap</h2>
+              <div class="heatmap-selector">
+                <button class="heatmap-btn active" data-heatmap="stocks">S&P 500</button>
+                <button class="heatmap-btn" data-heatmap="etf">ETF</button>
+                <button class="heatmap-btn" data-heatmap="crypto">Crypto</button>
+              </div>
+            </div>
+            <div class="widget-container widget-heatmap-overview" id="widget-heatmap-overview"></div>
+          </div>
         </div>
-        <div class="market-overview-grid">
-          <div class="widget-card mini-chart-card">
-            <a href="https://www.tradingview.com/symbols/SPY/" target="_blank" rel="noopener" class="widget-title-link">S&P 500 ETF (SPY)</a>
-            <div class="widget-container" id="widget-spy"></div>
+
+        <!-- Row 2: Market Overview + Biggest Movers (equal width) -->
+        <div class="overview-row-2">
+          <!-- Market Overview Card -->
+          <div class="widget-card overview-market-card">
+            <div class="card-header">
+              <h2>Market Overview</h2>
+            </div>
+            <div class="market-chart-container">
+              <div class="widget-container widget-medium" id="widget-market-chart"></div>
+            </div>
           </div>
-          <div class="widget-card mini-chart-card">
-            <a href="https://www.tradingview.com/symbols/QQQ/" target="_blank" rel="noopener" class="widget-title-link">Nasdaq 100 ETF (QQQ)</a>
-            <div class="widget-container" id="widget-qqq"></div>
+
+          <!-- Biggest Movers Card - widget has its own tabs -->
+          <div class="widget-card overview-movers-card">
+            <div class="card-header">
+              <h2>Biggest Movers</h2>
+            </div>
+            <div class="widget-container widget-movers-list" id="widget-movers-overview"></div>
           </div>
-          <div class="widget-card mini-chart-card">
-            <a href="https://www.tradingview.com/symbols/DIA/" target="_blank" rel="noopener" class="widget-title-link">Dow Jones ETF (DIA)</a>
-            <div class="widget-container" id="widget-dia"></div>
+        </div>
+
+        <!-- Row 3: Earnings Calendar + Economic Calendar -->
+        <div class="overview-row-3">
+          <!-- Earnings Calendar Card -->
+          <div class="widget-card overview-calendar-card">
+            <div class="card-header">
+              <h2>Earnings Calendar</h2>
+            </div>
+            <div class="widget-container widget-calendar-compact" id="widget-earnings-overview"></div>
           </div>
-          <div class="widget-card mini-chart-card">
-            <a href="https://www.tradingview.com/symbols/IWM/" target="_blank" rel="noopener" class="widget-title-link">Russell 2000 ETF (IWM)</a>
-            <div class="widget-container" id="widget-iwm"></div>
+
+          <!-- Economic Calendar Card -->
+          <div class="widget-card overview-calendar-card">
+            <div class="card-header">
+              <h2>Economic Calendar</h2>
+            </div>
+            <div class="widget-container widget-calendar-compact" id="widget-economic-overview"></div>
           </div>
-          <div class="widget-card mini-chart-card">
-            <a href="https://www.tradingview.com/symbols/TLT/" target="_blank" rel="noopener" class="widget-title-link">20+ Year Treasury (TLT)</a>
-            <div class="widget-container" id="widget-tlt"></div>
-          </div>
-          <div class="widget-card mini-chart-card">
-            <a href="https://www.tradingview.com/symbols/GLD/" target="_blank" rel="noopener" class="widget-title-link">Gold ETF (GLD)</a>
-            <div class="widget-container" id="widget-gld"></div>
+        </div>
+
+        <!-- Row 4: Financial News -->
+        <div class="overview-row-4">
+          <div class="widget-card overview-news-card">
+            <div class="section-header">
+              <h2>Financial News</h2>
+              <span class="news-count" id="news-count-overview"></span>
+            </div>
+            <div class="news-feed overview-news-feed" id="news-feed-overview">
+              <div class="loading-spinner">
+                <div class="spinner"></div>
+                <span>Loading news...</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- Sectors Section -->
-      <section class="content-section" id="section-sectors">
+      <!-- Heatmaps Section -->
+      <section class="content-section" id="section-heatmaps">
         <div class="section-header">
-          <h2>Sector Heatmap</h2>
+          <h2>Heatmap</h2>
+          <div class="heatmap-selector heatmap-selector-tab">
+            <button class="heatmap-btn active" data-heatmap="stocks">S&P 500</button>
+            <button class="heatmap-btn" data-heatmap="etf">ETF</button>
+            <button class="heatmap-btn" data-heatmap="crypto">Crypto</button>
+          </div>
         </div>
-        
-        <!-- Sector Pills -->
-        <div class="sector-pills" id="sector-pills">
-          <button class="sector-pill" data-sector="technology">Technology</button>
-          <button class="sector-pill" data-sector="healthcare">Healthcare</button>
-          <button class="sector-pill" data-sector="financials">Financials</button>
-          <button class="sector-pill" data-sector="energy">Energy</button>
-          <button class="sector-pill" data-sector="consumer">Consumer</button>
-          <button class="sector-pill" data-sector="industrials">Industrials</button>
-          <button class="sector-pill" data-sector="utilities">Utilities</button>
-          <button class="sector-pill" data-sector="materials">Materials</button>
-          <button class="sector-pill" data-sector="realestate">Real Estate</button>
-          <button class="sector-pill" data-sector="communication">Communication</button>
-        </div>
-        
-        <div class="heatmap-legend">
-          <span class="legend-label">▼ Losers</span>
-          <div class="legend-gradient"></div>
-          <span class="legend-label">Gainers ▲</span>
-        </div>
-        
+
         <div class="widget-card heatmap-card">
           <div class="widget-container widget-tall" id="widget-heatmap"></div>
         </div>
@@ -189,11 +240,6 @@
       <section class="content-section" id="section-movers">
         <div class="section-header">
           <h2>Biggest Movers</h2>
-        </div>
-        <div class="movers-tabs">
-          <button class="movers-tab active" data-period="regular">Regular Hours</button>
-          <button class="movers-tab" data-period="premarket">Pre-Market</button>
-          <button class="movers-tab" data-period="afterhours">After-Hours</button>
         </div>
         <div class="widget-card movers-card">
           <div class="widget-container widget-tall" id="widget-movers"></div>
@@ -231,22 +277,6 @@
         </div>
       </section>
     </div>
-
-    <!-- Right Sidebar -->
-    <aside class="sidebar sidebar-right">
-      <section class="card notes-card">
-        <div class="card-header">
-          <h2>Notes</h2>
-          <button class="icon-btn" id="clear-notes-btn" title="Clear Notes">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-          </button>
-        </div>
-        <textarea id="notes-textarea" class="notes-textarea" placeholder="Jot down your market thoughts..."></textarea>
-      </section>
-    </aside>
   </main>
 
   <!-- Mobile Bottom Tab Bar -->
@@ -257,14 +287,14 @@
       </svg>
       <span>Overview</span>
     </button>
-    <button class="bottom-tab" data-tab="sectors">
+    <button class="bottom-tab" data-tab="heatmaps">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="3" y="3" width="7" height="7"></rect>
         <rect x="14" y="3" width="7" height="7"></rect>
         <rect x="14" y="14" width="7" height="7"></rect>
         <rect x="3" y="14" width="7" height="7"></rect>
       </svg>
-      <span>Sectors</span>
+      <span>Heatmaps</span>
     </button>
     <button class="bottom-tab" data-tab="movers">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -284,7 +314,9 @@
     </button>
     <button class="bottom-tab" data-tab="news">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path>
+        <path
+          d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2">
+        </path>
         <path d="M18 14h-8"></path>
         <path d="M15 18h-5"></path>
         <path d="M10 6h8v4h-8V6Z"></path>
@@ -312,4 +344,5 @@
 
   <script src="app.js"></script>
 </body>
+
 </html>
